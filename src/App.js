@@ -1,25 +1,37 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useReducer, createContext } from 'react';
 import './App.css';
 
+import Chart from './containers/ChartContainer';
+
+import FilterReducer, { getOptions } from './reducers/FilterReducer';
+import Filters from './containers/FiltersContainer';
+
+const datasourceFilterState = {
+  selected: [],
+  options: [{value: 'All', label: 'All'}, ...getOptions('Datasource') ]
+};
+
+const campaignFilterState = {
+  selected: [],
+  options: [{value: 'All', label: 'All'}, ...getOptions('Campaign') ]
+};
+
+export const DatasourceFilterContext = createContext();
+export const CampaignFilterContext = createContext();
+
 function App() {
+  const [datasourceState, datasourceDispatch] = useReducer(FilterReducer, datasourceFilterState);
+  const [campaignState, campaignDispatch] = useReducer(FilterReducer, campaignFilterState);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <DatasourceFilterContext.Provider value={{ datasourceState, datasourceDispatch }}>
+      <CampaignFilterContext.Provider value={{ campaignState, campaignDispatch }}>
+        <div className="app">
+          <Filters/>
+          <Chart campaigns={campaignState.selected} datasources={datasourceState.selected}/>
+        </div>
+      </CampaignFilterContext.Provider>
+    </DatasourceFilterContext.Provider>
   );
 }
 
